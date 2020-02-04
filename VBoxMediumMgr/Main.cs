@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Vanara;
 using VirtualBox;
 using VirtualBoxAPI;
 using static Vanara.PInvoke.ShlwApi;
@@ -116,18 +117,15 @@ namespace VBoxMediumMgr
 			await RefreshList();
 		}
 
-		private async void compactCmd_Click(object sender, EventArgs e)
-		{
-			await RunMultiple(async di =>
-			{
-				if (di.Format == "VDI")
-					await RunAsync("Compacting", async (t, p) => await Medium.CompactAsync(di.Location, t, p), di.UUID);
-				else if (di.Format == "VHD")
-					await RunAsync("Compacting", async (t, p) => await MSVirtualDisk.CompactVHD(di.Location, t, p), di.UUID);
-				else
-					MessageBox.Show(this, $"Unable to compact disks of type {di.Format}.", null, MessageBoxButtons.OK, MessageBoxIcon.Error);
-			});
-		}
+		private async void compactCmd_Click(object sender, EventArgs e) => await RunMultiple(async di =>
+																		   {
+																			   if (di.Format == "VDI")
+																				   await RunAsync("Compacting", async (t, p) => await Medium.CompactAsync(di.Location, t, p), di.UUID);
+																			   else if (di.Format == "VHD")
+																				   await RunAsync("Compacting", async (t, p) => await MSVirtualDisk.CompactVHD(di.Location, t, p), di.UUID);
+																			   else
+																				   MessageBox.Show(this, $"Unable to compact disks of type {di.Format}.", null, MessageBoxButtons.OK, MessageBoxIcon.Error);
+																		   });
 
 		private void copyMenuItem_Click(object sender, EventArgs e)
 		{
@@ -308,29 +306,26 @@ namespace VBoxMediumMgr
 
 		private void ProgressDlg_Cancelled(object sender, CancelEventArgs e) => cancelToken?.Cancel();
 
-		private async Task RefreshAsync(CancellationToken cancellationToken, IProgress<Tuple<int, string>> progress, string uuid = null)
-		{
-			await Task.Run(() =>
-			{
-				for (var i = 0; i < disks.Count; i++)
-				{
-					var disk = disks[i];
-					if (uuid != null && string.CompareOrdinal(uuid, disk.UUID) != 0) continue;
-					progress.Report(new Tuple<int, string>(i * 100 / disks.Count, disk.Name));
-					if (cancellationToken.IsCancellationRequested)
-						break;
-					try
-					{
-						var vdi = Medium.OpenMedium(disk.Location, AccessMode.AccessMode_ReadOnly);
-						vdi.RefreshState();
-						disk.Update(vdi);
-					}
-					catch { }
-					Invoke(new Action<Guid>(UpdateItem), disk.Key);
-				}
-				progress.Report(new Tuple<int, string>(100, ""));
-			}, cancellationToken);
-		}
+		private async Task RefreshAsync(CancellationToken cancellationToken, IProgress<Tuple<int, string>> progress, string uuid = null) => await Task.Run(() =>
+																																			{
+																																				for (var i = 0; i < disks.Count; i++)
+																																				{
+																																					var disk = disks[i];
+																																					if (uuid != null && string.CompareOrdinal(uuid, disk.UUID) != 0) continue;
+																																					progress.Report(new Tuple<int, string>(i * 100 / disks.Count, disk.Name));
+																																					if (cancellationToken.IsCancellationRequested)
+																																						break;
+																																					try
+																																					{
+																																						var vdi = Medium.OpenMedium(disk.Location, AccessMode.AccessMode_ReadOnly);
+																																						vdi.RefreshState();
+																																						disk.Update(vdi);
+																																					}
+																																					catch { }
+																																					Invoke(new Action<Guid>(UpdateItem), disk.Key);
+																																				}
+																																				progress.Report(new Tuple<int, string>(100, ""));
+																																			}, cancellationToken);
 
 		private async void refreshCmd_Click(object sender, EventArgs e) => await RefreshList();
 

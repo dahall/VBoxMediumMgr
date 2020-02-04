@@ -13,8 +13,8 @@ namespace VirtualBoxAPI
 	public static class Client
 	{
 		public static VirtualBoxClient Instance { get; } = new VirtualBoxClient();
-		public static Session Session => Instance.Session;
 		public static IVirtualBox VBox { get; } = Instance.VirtualBox;
+		public static Session Session => Instance.Session;
 
 		internal static async Task ProcessProgress(IProgress methodHandler, CancellationToken cancellationToken, IProgress<Tuple<int, string>> progress)
 		{
@@ -32,7 +32,7 @@ namespace VirtualBoxAPI
 				throw new Win32Exception(methodHandler.ErrorInfo.ResultCode, methodHandler.ErrorInfo.Text);
 			ReportProgress((int)methodHandler.Percent, methodHandler.Description);
 
-			void ReportProgress(int percent, string desc) { progress.Report(new Tuple<int, string>(percent, desc)); }
+			void ReportProgress(int percent, string desc) => progress.Report(new Tuple<int, string>(percent, desc));
 		}
 	}
 
@@ -101,26 +101,6 @@ namespace VirtualBoxAPI
 			return attInfo;
 		}
 
-		private class MachineLock : IDisposable
-		{
-			private Session session;
-
-			public MachineLock(IMachine machine)
-			{
-				session = Client.Session;
-				machine.LockMachine(session, LockType.LockType_Write);
-				if (session.State != SessionState.SessionState_Locked) throw new InvalidOperationException("Unable to lock session.");
-				Raw = session.Machine;
-			}
-
-			public IMachine Raw { get; }
-
-			void IDisposable.Dispose()
-			{
-				Raw.SaveSettings(); session.UnlockMachine();
-			}
-		}
-
 		public static async Task MoveAsync(string src, string dest, CancellationToken cancellationToken, IProgress<Tuple<int, string>> progress)
 		{
 			if (string.IsNullOrEmpty(Path.GetDirectoryName(dest))) dest = Path.Combine(Path.GetDirectoryName(src), Path.GetFileName(dest));
@@ -180,6 +160,26 @@ namespace VirtualBoxAPI
 			public DeviceType DeviceType { get; }
 			public string MachineId { get; }
 			public string MediumId { get; }
+		}
+
+		private class MachineLock : IDisposable
+		{
+			private readonly Session session;
+
+			public MachineLock(IMachine machine)
+			{
+				session = Client.Session;
+				machine.LockMachine(session, LockType.LockType_Write);
+				if (session.State != SessionState.SessionState_Locked) throw new InvalidOperationException("Unable to lock session.");
+				Raw = session.Machine;
+			}
+
+			public IMachine Raw { get; }
+
+			void IDisposable.Dispose()
+			{
+				Raw.SaveSettings(); session.UnlockMachine();
+			}
 		}
 	}
 }

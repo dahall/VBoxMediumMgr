@@ -5,10 +5,10 @@ using System.Windows.Forms;
 namespace VBoxMediumMgr
 {
 	/// <summary>
-	/// Multi-level, auto-sizing, progress dialog. The <see cref="MacroPercentComplete"/> and <see cref="MacroStatusText"/> properties, if set, will reveal a
-	/// progress bar and status above the standard progress bar and status that can be used for high-level (macro) progress. For example, if you were copying
-	/// many large files from one directory to another, the macro items would track the progress of all files (1 of X files) and the standard items would track
-	/// the progress of copying a single file.
+	/// Multi-level, auto-sizing, progress dialog. The <see cref="MacroPercentComplete"/> and <see cref="MacroStatusText"/> properties, if
+	/// set, will reveal a progress bar and status above the standard progress bar and status that can be used for high-level (macro)
+	/// progress. For example, if you were copying many large files from one directory to another, the macro items would track the progress
+	/// of all files (1 of X files) and the standard items would track the progress of copying a single file.
 	/// </summary>
 	public partial class ProgressDialog : Form
 	{
@@ -24,8 +24,8 @@ namespace VBoxMediumMgr
 		public event CancelEventHandler Cancelled;
 
 		/// <summary>
-		/// Gets or sets the value of the macro progress bar. Valid values are 0 to 100. If this value is 0 and <see cref="MacroStatusText"/> is null or empty,
-		/// the macro items will be hidden.
+		/// Gets or sets the value of the macro progress bar. Valid values are 0 to 100. If this value is 0 and <see
+		/// cref="MacroStatusText"/> is null or empty, the macro items will be hidden.
 		/// </summary>
 		/// <value>The macro percent complete.</value>
 		[DefaultValue(0)]
@@ -36,8 +36,8 @@ namespace VBoxMediumMgr
 		}
 
 		/// <summary>
-		/// Gets or sets the status text displayed above the macro progress bar. If this value is null or empty and <see cref="MacroPercentComplete"/> is 0, the
-		/// macro items will be hidden.
+		/// Gets or sets the status text displayed above the macro progress bar. If this value is null or empty and <see
+		/// cref="MacroPercentComplete"/> is 0, the macro items will be hidden.
 		/// </summary>
 		/// <value>The macro status text.</value>
 		[DefaultValue("")]
@@ -75,10 +75,7 @@ namespace VBoxMediumMgr
 
 		/// <summary>Raises the <see cref="E:Cancelled"/> event.</summary>
 		/// <param name="e">The <see cref="CancelEventArgs"/> instance containing the event data.</param>
-		protected virtual void OnCancelled(CancelEventArgs e)
-		{
-			Cancelled?.Invoke(this, e);
-		}
+		protected virtual void OnCancelled(CancelEventArgs e) => Cancelled?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="E:System.Windows.Forms.Form.FormClosed"/> event.</summary>
 		/// <param name="e">A <see cref="T:System.Windows.Forms.FormClosedEventArgs"/> that contains the event data.</param>
@@ -91,17 +88,11 @@ namespace VBoxMediumMgr
 		/// <summary>Handles the SizeChanged event of the bodyPanel control.</summary>
 		/// <param name="sender">The source of the event.</param>
 		/// <param name="eventArgs">The <see cref="EventArgs"/> instance containing the event data.</param>
-		private void BodyPanel_SizeChanged(object sender, EventArgs eventArgs)
-		{
-			Size = new System.Drawing.Size(Width, bodyPanel.Height + Height - ClientSize.Height);
-		}
+		private void BodyPanel_SizeChanged(object sender, EventArgs eventArgs) => Size = new System.Drawing.Size(Width, bodyPanel.Height + Height - ClientSize.Height);
 
 		/// <summary>Handles the Click event of the cancelBtn control.</summary>
 		/// <param name="sender">The source of the event.</param>
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-		private void CancelBtn_Click(object sender, EventArgs e)
-		{
-			OnCancelled(new CancelEventArgs(true));
-		}
+		private void CancelBtn_Click(object sender, EventArgs e) => OnCancelled(new CancelEventArgs(true));
 	}
 }

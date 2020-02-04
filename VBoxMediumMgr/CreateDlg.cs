@@ -6,9 +6,13 @@ namespace VBoxMediumMgr
 {
 	public partial class CreateDlg : Form
 	{
-		public CreateDlg()
+		public CreateDlg() => InitializeComponent();
+
+		[DefaultValue(0)]
+		public HDFileType FileType
 		{
-			InitializeComponent();
+			get => diskOptionsCtrl.FileType;
+			set => diskOptionsCtrl.FileType = value;
 		}
 
 		[DefaultValue("")]
@@ -18,18 +22,11 @@ namespace VBoxMediumMgr
 			set => fileTextBox.Text = value;
 		}
 
-		[DefaultValue(4194304)]
-		public ulong FileSize => diskSizer.FileSize;
-
-		[DefaultValue(0)]
-		public HDFileType FileType
-		{
-			get => diskOptionsCtrl.FileType;
-			set => diskOptionsCtrl.FileType = value;
-		}
-
 		[DefaultValue(true)]
 		public bool Dynamic => diskOptionsCtrl.Dynamic;
+
+		[DefaultValue(4194304)]
+		public ulong FileSize => diskSizer.FileSize;
 
 		[DefaultValue(false)]
 		public bool SplitFile => diskOptionsCtrl.SplitFile;
@@ -41,14 +38,8 @@ namespace VBoxMediumMgr
 				fileTextBox.Text = saveFileDialog1.FileName;
 		}
 
-		private void okBtn_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
+		private void fileTextBox_TextChanged(object sender, EventArgs e) => okBtn.Enabled = fileTextBox.TextLength > 0;
 
-		private void fileTextBox_TextChanged(object sender, EventArgs e)
-		{
-			okBtn.Enabled = fileTextBox.TextLength > 0;
-		}
+		private void okBtn_Click(object sender, EventArgs e) => Close();
 	}
 }

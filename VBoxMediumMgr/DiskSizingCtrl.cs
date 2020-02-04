@@ -13,14 +13,14 @@ namespace VBoxMediumMgr
 			tableLayoutPanel1.ColumnStyles[2].Width = TextRenderer.MeasureText(" 256.00 MB ", label3.Font).Width;
 		}
 
+		[DefaultValue(4194304)]
+		public ulong FileSize => 1UL << sizeSlider.Value;
+
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);
 			tableLayoutPanel1.ColumnStyles[2].Width = TextRenderer.MeasureText(" 256.00 MB ", label3.Font).Width;
 		}
-
-		[DefaultValue(4194304)]
-		public ulong FileSize => 1UL << sizeSlider.Value;
 
 		private void sizeSlider_Scroll(object sender, EventArgs e)
 		{

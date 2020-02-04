@@ -15,14 +15,13 @@ namespace VBoxMediumMgr
 		private const int basePow = 22;
 		private const int maxPow = 41;
 		private const int step = 8;
-		private static readonly Color borderClr = Color.FromArgb(214,214,214);
-		private static readonly Color curClr = Color.FromArgb(231,234,234);
-		private static readonly Color usedClr = Color.Gray;
+		private static readonly Color borderClr = Color.FromArgb(214, 214, 214);
+		private static readonly Color curClr = Color.FromArgb(231, 234, 234);
 		private static readonly Color usedBrdClr = Color.Gray;
-
+		private static readonly Color usedClr = Color.Gray;
+		private static Bitmap thumbBmp;
 		private long diskSize;
 		private long diskUsed;
-		private static Bitmap thumbBmp;
 
 		public DiskResizerCtrl()
 		{
@@ -69,7 +68,7 @@ namespace VBoxMediumMgr
 		private static int ClosestVal(long bytes)
 		{
 			var approx = Math.Log(bytes >> 22, 2) * step;
-			var floor = (int) Math.Floor(approx);
+			var floor = (int)Math.Floor(approx);
 			if (ValToSize(floor) == bytes) return floor;
 			return (int)Math.Ceiling(approx);
 		}

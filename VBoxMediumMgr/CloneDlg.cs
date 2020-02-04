@@ -91,15 +91,9 @@ namespace VBoxMediumMgr
 				fileTextBox.Text = saveFileDialog1.FileName;
 		}
 
-		private void fileTextBox_TextChanged(object sender, EventArgs e)
-		{
-			okBtn.Enabled = fileTextBox.TextLength > 0;
-		}
+		private void fileTextBox_TextChanged(object sender, EventArgs e) => okBtn.Enabled = fileTextBox.TextLength > 0;
 
-		private void okBtn_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
+		private void okBtn_Click(object sender, EventArgs e) => Close();
 
 		private void RefreshMediums(string mediumId)
 		{

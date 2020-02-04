@@ -7,17 +7,15 @@ namespace VBoxMediumMgr
 {
 	public partial class ResizeDlg : Form
 	{
+		private bool initializing, sliderMove;
 		private string srcId;
 		private long startSize;
-		private bool initializing, sliderMove;
 
 		public ResizeDlg(string mediumId = null)
 		{
 			InitializeComponent();
 			RefreshMediums(mediumId);
 		}
-
-		public long NewDiskSize => diskResizerCtrl1.NewDiskSize;
 
 		[DefaultValue(null)]
 		public string SourceUuid
@@ -34,17 +32,7 @@ namespace VBoxMediumMgr
 			}
 		}
 
-		private void okBtn_Click(object sender, EventArgs e)
-		{
-			Close();
-		}
-
-		private void RefreshMediums(string mediumId)
-		{
-			diskComboBox.Items.Clear();
-			diskComboBox.Items.AddRange(Main.Disks.Cast<object>().ToArray());
-			SourceUuid = mediumId;
-		}
+		public long NewDiskSize => diskResizerCtrl1.NewDiskSize;
 
 		private void diskComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
@@ -68,8 +56,17 @@ namespace VBoxMediumMgr
 
 		private void newSize_TextChanged(object sender, EventArgs e)
 		{
-			if (!initializing && !sliderMove && ByteSizeFormatter.TryParse(newSize.Text, out long sz))
+			if (!initializing && !sliderMove && ByteSizeFormatter.TryParse(newSize.Text, out var sz))
 				diskResizerCtrl1.NewDiskSize = sz;
+		}
+
+		private void okBtn_Click(object sender, EventArgs e) => Close();
+
+		private void RefreshMediums(string mediumId)
+		{
+			diskComboBox.Items.Clear();
+			diskComboBox.Items.AddRange(Main.Disks.Cast<object>().ToArray());
+			SourceUuid = mediumId;
 		}
 	}
 }

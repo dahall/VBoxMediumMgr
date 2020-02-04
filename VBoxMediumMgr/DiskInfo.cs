@@ -80,7 +80,7 @@ namespace VBoxMediumMgr
 			AttachedToIds = med.MachineIds.Cast<string>().ToArray();
 			AttachedTo = string.Join(", ", Client.VBox.Machines.Cast<IMachine>().Where(m => AttachedToIds.Any(id => string.Equals(m.Id, id, StringComparison.Ordinal))).Select(m => m.Name));
 			//med.MediumFormat.DescribeProperties(out Array pNames, out Array pDesc, out Array pTypes, out Array pFlags, out Array pDef);
-			var props = med.GetProperties(null, out Array retNames);
+			var props = med.GetProperties(null, out var retNames);
 			Properties.Clear();
 			for (var i = 0; i < retNames.Length; i++)
 				Properties.Add(retNames.GetValue(i)?.ToString(), props.GetValue(i)?.ToString());

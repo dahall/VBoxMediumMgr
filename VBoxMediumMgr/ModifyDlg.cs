@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using VirtualBox;
@@ -17,6 +16,7 @@ Cancel
 } otherwise.
 \par}
 }";
+
 		private const string not = @"{{\rtf1\ansi
 {{\pard
 You are about to change the settings of the disk image file {{\b
@@ -57,7 +57,7 @@ You are about to change the settings of the disk image file {{\b
 		private void ModeCheckChanged(object sender, EventArgs e)
 		{
 			if (!(sender is RadioButton rb) || !(rb.Tag is MediumType type)) return;
-			modeHelpText.Text = ModeDesc[(int) type];
+			modeHelpText.Text = ModeDesc[(int)type];
 			okBtn.Enabled = type != initialType;
 		}
 	}

@@ -1,10 +1,7 @@
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Vanara.InteropServices;
 using Vanara.PInvoke;
-using Vanara.Security.AccessControl;
 using static Vanara.PInvoke.AdvApi32;
 using static Vanara.PInvoke.VirtDisk;
 
@@ -22,7 +19,7 @@ namespace VBoxMediumMgr
 			var param = OPEN_VIRTUAL_DISK_PARAMETERS.DefaultV2;
 			var err = OpenVirtualDisk(stType, loc, VIRTUAL_DISK_ACCESS_MASK.VIRTUAL_DISK_ACCESS_NONE, OPEN_VIRTUAL_DISK_FLAG.OPEN_VIRTUAL_DISK_FLAG_NONE, param, out var hVhd);
 			err.ThrowIfFailed();
-			if (!ConvertStringSecurityDescriptorToSecurityDescriptor("O:BAG:BAD:(A;;GA;;;WD)", SDDL_REVISION.SDDL_REVISION_1, out var sd, out uint hLen))
+			if (!ConvertStringSecurityDescriptorToSecurityDescriptor("O:BAG:BAD:(A;;GA;;;WD)", SDDL_REVISION.SDDL_REVISION_1, out var sd, out var hLen))
 				Win32Error.ThrowLastError();
 			var aParam = ATTACH_VIRTUAL_DISK_PARAMETERS.Default;
 			err = AttachVirtualDisk(hVhd, (IntPtr)sd, ATTACH_VIRTUAL_DISK_FLAG.ATTACH_VIRTUAL_DISK_FLAG_PERMANENT_LIFETIME | ATTACH_VIRTUAL_DISK_FLAG.ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY, 0, aParam, IntPtr.Zero);
@@ -84,7 +81,7 @@ namespace VBoxMediumMgr
 				}
 			}
 
-			void ReportProgress(int percent) { progress.Report(new Tuple<int, string>(percent, $"Compacting VHD volume \"{loc}\"")); }
+			void ReportProgress(int percent) => progress.Report(new Tuple<int, string>(percent, $"Compacting VHD volume \"{loc}\""));
 
 			/*var prog = new Progress<int>(i => progress.Report(new Tuple<int, string>(i / 2, loc)));
 			var taskComplete = false;

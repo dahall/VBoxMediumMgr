@@ -18,37 +18,38 @@ namespace VBoxMediumMgr
 {
 	/// <summary>Interface used by <see cref="CommandBindings"/> to provide support for binding a <see cref="Command"/> to a UI element.</summary>
 	/// <remarks>
-	/// To add support for additional UI elements, create a class that derives from <see cref="ICommandBinder"/> and supply a default constructor with no
-	/// parameters. Implementing the interface, requires that the <see cref="Type"/> of the control being supported is supplied to the output of the
-	/// <see cref="SupportedType"/> property and the other methods are implemented such that a <see cref="Command"/> can add and remove a click event handler and
-	/// set property values.
+	/// To add support for additional UI elements, create a class that derives from <see cref="ICommandBinder"/> and supply a default
+	/// constructor with no parameters. Implementing the interface, requires that the <see cref="Type"/> of the control being supported is
+	/// supplied to the output of the <see cref="SupportedType"/> property and the other methods are implemented such that a <see
+	/// cref="Command"/> can add and remove a click event handler and set property values.
 	/// <para>
-	/// Before your UI is loaded, make sure to add an instance of your custom binder to the <see cref="CommandBindings.Commands"/> property. If overriding
-	/// support for either <see cref="ButtonBase"/> or <see cref="ToolStripItem"/> derived controls, make sure to remove the default handler from that same list.
+	/// Before your UI is loaded, make sure to add an instance of your custom binder to the <see cref="CommandBindings.Commands"/> property.
+	/// If overriding support for either <see cref="ButtonBase"/> or <see cref="ToolStripItem"/> derived controls, make sure to remove the
+	/// default handler from that same list.
 	/// </para>
 	/// <para>The following example is the default binder for all <c>ToolStripItem</c> derived controls.</para>
 	/// <code lang="C#">
-	/// public class ToolStripItemCommandBinder : ICommandBinder
-	/// {
-	/// 	public Type SupportedType { get; } = typeof(ToolStripItem);
+	///public class ToolStripItemCommandBinder : ICommandBinder
+	///{
+	///public Type SupportedType { get; } = typeof(ToolStripItem);
 	///
-	/// 	public void AddClickHandler(Component c, EventHandler h)
-	/// 	{
-	/// 		if (c is ToolStripItem ctrl) ctrl.Click += h;
-	/// 	}
+	///public void AddClickHandler(Component c, EventHandler h)
+	///{
+	///if (c is ToolStripItem ctrl) ctrl.Click += h;
+	///}
 	///
-	/// 	public void RemoveClickHandler(Component c, EventHandler h)
-	/// 	{
-	/// 		if (c is ToolStripItem ctrl) ctrl.Click -= h;
-	/// 	}
+	///public void RemoveClickHandler(Component c, EventHandler h)
+	///{
+	///if (c is ToolStripItem ctrl) ctrl.Click -= h;
+	///}
 	///
-	/// 	public virtual void SetValue&lt;T&gt;(Component c, string propertyName, T value)
-	/// 	{
-	/// 		var pi = c.GetType().GetProperty(propertyName, typeof(T), Type.EmptyTypes);
-	/// 		if (pi == null) return;
-	/// 		pi.SetValue(c, value);
-	/// 	}
-	/// }
+	///public virtual void SetValue&lt;T&gt;(Component c, string propertyName, T value)
+	///{
+	///var pi = c.GetType().GetProperty(propertyName, typeof(T), Type.EmptyTypes);
+	///if (pi == null) return;
+	///pi.SetValue(c, value);
+	///}
+	///}
 	/// </code>
 	/// </remarks>
 	public interface ICommandBinder
@@ -75,6 +76,28 @@ namespace VBoxMediumMgr
 		/// </param>
 		/// <param name="value">The value to assign to the named property.</param>
 		void SetValue<T>(Component component, string propertyName, T value);
+	}
+
+	/// <summary>A binder for all controls derived from <see cref="ButtonBase"/>.</summary>
+	/// <seealso cref="ControlBinder"/>
+	public class ButtonCommandBinder : ControlBinder
+	{
+		/// <summary>Gets the type of the supported.</summary>
+		/// <value>The type of the supported.</value>
+		public override Type SupportedType { get; } = typeof(ButtonBase);
+
+		/// <summary>Sets the value of a named property of type <typeparamref name="T"/>.</summary>
+		/// <typeparam name="T">The type of the property.</typeparam>
+		/// <param name="component">The <see cref="Component"/> on which to see the property.</param>
+		/// <param name="propertyName">
+		/// The name of the property. If the implemented class cannot support a property of this name, it should return without throwing an exception.
+		/// </param>
+		/// <param name="value">The value to assign to the named property.</param>
+		public override void SetValue<T>(Component component, string propertyName, T value)
+		{
+			if (propertyName == "ToolTipText") return;
+			base.SetValue(component, propertyName, value);
+		}
 	}
 
 	/// <summary>Represents a generic UI command which can be applied to UI elements like buttons, menus and toolbars.</summary>
@@ -173,7 +196,7 @@ namespace VBoxMediumMgr
 				{
 					if (value != -1)
 						SetProperty<Image>(null, "Image");
-					imageKey = String.Empty;
+					imageKey = string.Empty;
 					imageIndex = value;
 					useIntegerImageIndex = true;
 				}
@@ -195,14 +218,11 @@ namespace VBoxMediumMgr
 					if (value != null)
 						SetProperty<Image>(null, "Image");
 					SetProperty(-1, "ImageIndex");
-					imageKey = value ?? String.Empty;
+					imageKey = value ?? string.Empty;
 					useIntegerImageIndex = false;
 				}
 			}
 		}
-
-		[Browsable(false)]
-		public ImageList ImageList => parent?.ImageList;
 
 		/// <summary>Gets or sets the text to display on supporting UI elements.</summary>
 		/// <value>The text.</value>
@@ -235,6 +255,9 @@ namespace VBoxMediumMgr
 			get => GetProperty(true);
 			set => SetProperty(value);
 		}
+
+		[Browsable(false)]
+		public ImageList ImageList => parent?.ImageList;
 
 		internal int ActualIndex
 		{
@@ -272,28 +295,19 @@ namespace VBoxMediumMgr
 
 		/// <summary>Calls the <see cref="Click"/> event.</summary>
 		/// <param name="sender">The sender of the event. This is typically the UI element.</param>
-		public virtual void OnClick(object sender)
-		{
-			Click?.Invoke(sender, EventArgs.Empty);
-		}
+		public virtual void OnClick(object sender) => Click?.Invoke(sender, EventArgs.Empty);
 
 		/// <summary>Gets the value of a property for this Command.</summary>
 		/// <typeparam name="T">The type of the property value.</typeparam>
 		/// <param name="defaultValue">The default value for the property if it is not found.</param>
 		/// <param name="propertyName">The name of the property to get. This value is auto-populated with the calling property name.</param>
 		/// <returns>The value of the property, if found, or <paramref name="defaultValue"/> if not.</returns>
-		protected T GetProperty<T>(T defaultValue = default(T), [CallerMemberName] string propertyName = null)
-		{
-			return Properties.TryGetValue(propertyName, out object oldVal) && oldVal is T ? (T)oldVal : defaultValue;
-		}
+		protected T GetProperty<T>(T defaultValue = default(T), [CallerMemberName] string propertyName = null) => Properties.TryGetValue(propertyName, out var oldVal) && oldVal is T ? (T)oldVal : defaultValue;
 
 		/// <summary>Calls the <see cref="PropertyChanged"/> event.</summary>
 		/// <param name="propertyName">Name of the property that has changed.</param>
 		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 		/// <summary>Sets a property value.</summary>
 		/// <typeparam name="T">The type of the property value.</typeparam>
@@ -301,59 +315,59 @@ namespace VBoxMediumMgr
 		/// <param name="propertyName">The name of the property to set. This value is auto-populated with the calling property name.</param>
 		protected void SetProperty<T>(T value, [CallerMemberName] string propertyName = null)
 		{
-			if (Properties.TryGetValue(propertyName, out object oldVal) && Equals(oldVal, value)) return;
+			if (Properties.TryGetValue(propertyName, out var oldVal) && Equals(oldVal, value)) return;
 			Properties[propertyName] = value;
 			OnPropertyChanged(propertyName);
 		}
 
-		private void ResetImage()
-		{
-			Image = null;
-		}
+		private void ResetImage() => Image = null;
 
 		private bool ShouldSerializeImage() => image != null;
 	}
 
 	/// <summary>
-	/// Component that provides a command centralization for UI elements. Acting on a single <see cref="Command"/> will modify the properties of all bound UI
-	/// elements. Clicking on any bound UI element will fire the corresponding <see cref="Command.Click"/> event.
+	/// Component that provides a command centralization for UI elements. Acting on a single <see cref="Command"/> will modify the
+	/// properties of all bound UI elements. Clicking on any bound UI element will fire the corresponding <see cref="Command.Click"/> event.
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// Adding this to a form will extend all controls supported by built-in or supplied <see cref="ICommandBinder"/> derived binders and provide a
-	/// <c>Command</c> property. Currently, all <see cref="ButtonBase"/> and <see cref="ToolStripItem"/> derived UI elements are supported. See the Remarks for
-	/// <see cref="ICommandBinder"/> for information on adding additional binders.
+	/// Adding this to a form will extend all controls supported by built-in or supplied <see cref="ICommandBinder"/> derived binders and
+	/// provide a <c>Command</c> property. Currently, all <see cref="ButtonBase"/> and <see cref="ToolStripItem"/> derived UI elements are
+	/// supported. See the Remarks for <see cref="ICommandBinder"/> for information on adding additional binders.
 	/// </para>
 	/// <para>
-	/// Developers can use the <see cref="CommandBindings.Commands"/> property to add and configure commands for different UI activities. Each command, must, at
-	/// a minimum, have the <see cref="Command.Click"/> event assigned to a handler. When using the Collection Editor to add new <see cref="Command"/> instances,
-	/// the developer will need to then exit the Collection Editor and select the <see cref="Command"/> reference in order to edit the <c>Click</c> event.
+	/// Developers can use the <see cref="CommandBindings.Commands"/> property to add and configure commands for different UI activities.
+	/// Each command, must, at a minimum, have the <see cref="Command.Click"/> event assigned to a handler. When using the Collection Editor
+	/// to add new <see cref="Command"/> instances, the developer will need to then exit the Collection Editor and select the <see
+	/// cref="Command"/> reference in order to edit the <c>Click</c> event.
 	/// </para>
 	/// <para>Once all <see cref="Command"/> instances have been created, there are two means of assigning those commands to UI elements.</para>
 	/// <list type="number">
 	/// <item>
 	/// <description>
-	/// Create each UI element separately and assign the <c>Command</c> property for that element to the associated <c>Command</c> instance created earlier.
+	/// Create each UI element separately and assign the <c>Command</c> property for that element to the associated <c>Command</c> instance
+	/// created earlier.
 	/// </description>
 	/// </item>
 	/// <item>
 	/// <description>
-	/// Use the <see cref="LoadToolStripFromCommands"/> and <see cref="LoadMenuFromCommands"/> methods to automatically generate menu items and toolbar buttons
-	/// from the full list of Commands. This options requires that the <see cref="Command.Text"/> and/or the <see cref="Command.Image"/> properties are set.
+	/// Use the <see cref="LoadToolStripFromCommands"/> and <see cref="LoadMenuFromCommands"/> methods to automatically generate menu items
+	/// and toolbar buttons from the full list of Commands. This options requires that the <see cref="Command.Text"/> and/or the <see
+	/// cref="Command.Image"/> properties are set.
 	/// </description>
 	/// </item>
 	/// </list>
 	/// <para>
-	/// Now, to affect the behavior of the UI elements, simply set the values of the properties on the <see cref="Command"/> and all bound UI elements will be
-	/// changed. If, for example, you sent the <see cref="Command.Enabled"/> property to <c>false</c>, then all bound controls will have their <c>Enabled</c>
-	/// property set to <c>false</c> as well. Whenever the user clicks one of the controls bound to a <c>Command</c>, that <c>Command</c>'s
-	/// <see cref="Command.Click"/> event will be raised.
+	/// Now, to affect the behavior of the UI elements, simply set the values of the properties on the <see cref="Command"/> and all bound
+	/// UI elements will be changed. If, for example, you sent the <see cref="Command.Enabled"/> property to <c>false</c>, then all bound
+	/// controls will have their <c>Enabled</c> property set to <c>false</c> as well. Whenever the user clicks one of the controls bound to
+	/// a <c>Command</c>, that <c>Command</c>'s <see cref="Command.Click"/> event will be raised.
 	/// </para>
 	/// <para>
-	/// For example, you may have a menu item, a toolbar button and a context menu that all save an edited file. You can create a single <see cref="Command"/>
-	/// called <c>saveCmd</c>. You would then assign the <see cref="Command.Click"/> event a handler that saves the file. You would then assign the
-	/// <c>Command</c> property for each of those UI elements to the <c>saveCmd</c><see cref="Command"/>. Then, whenever one of those UI elements is clicked, the
-	/// <c>saveCmd</c>'s <c>Click</c> event is called.
+	/// For example, you may have a menu item, a toolbar button and a context menu that all save an edited file. You can create a single
+	/// <see cref="Command"/> called <c>saveCmd</c>. You would then assign the <see cref="Command.Click"/> event a handler that saves the
+	/// file. You would then assign the <c>Command</c> property for each of those UI elements to the <c>saveCmd</c><see cref="Command"/>.
+	/// Then, whenever one of those UI elements is clicked, the <c>saveCmd</c>'s <c>Click</c> event is called.
 	/// </para>
 	/// </remarks>
 	[Designer(typeof(CommandBindingsDesigner))]
@@ -411,16 +425,17 @@ namespace VBoxMediumMgr
 		/// <param name="component">The component.</param>
 		/// <returns>The associated <see cref="Command"/> instance or <c>null</c> if there is no binding.</returns>
 		[DefaultValue(null), Category("Binding")]
-		public Command GetBoundCommand([NotNull] Component component) => bindings.TryGetValue(component, out Command cmd) ? cmd : null;
+		public Command GetBoundCommand([NotNull] Component component) => bindings.TryGetValue(component, out var cmd) ? cmd : null;
 
 		/// <summary>
-		/// Appends a list of <see cref="ToolStripMenuItem"/> instances to the provided <paramref name="menu"/> based on the <see cref="Command"/> instances
-		/// managed by this component.
+		/// Appends a list of <see cref="ToolStripMenuItem"/> instances to the provided <paramref name="menu"/> based on the <see
+		/// cref="Command"/> instances managed by this component.
 		/// </summary>
 		/// <param name="menu">The menu to which to append the items.</param>
 		/// <remarks>
-		/// For best results, ensure the <c>Text</c> and/or <c>Image</c> property are set on every <see cref="Command"/> instance. A best practice would be to
-		/// call this one before the <see cref="Form"/> is loaded and after all <see cref="Command"/> instances have been added to the <see cref="Commands"/> property.
+		/// For best results, ensure the <c>Text</c> and/or <c>Image</c> property are set on every <see cref="Command"/> instance. A best
+		/// practice would be to call this one before the <see cref="Form"/> is loaded and after all <see cref="Command"/> instances have
+		/// been added to the <see cref="Commands"/> property.
 		/// </remarks>
 		public void LoadMenuFromCommands([NotNull] ToolStripItemCollection menu)
 		{
@@ -435,14 +450,15 @@ namespace VBoxMediumMgr
 		}
 
 		/// <summary>
-		/// Appends a list of <see cref="ToolStripButton"/> instances to the provided <paramref name="tools"/> based on the <see cref="Command"/> instances
-		/// managed by this component.
+		/// Appends a list of <see cref="ToolStripButton"/> instances to the provided <paramref name="tools"/> based on the <see
+		/// cref="Command"/> instances managed by this component.
 		/// </summary>
 		/// <param name="tools">The <see cref="ToolStrip"/> to which to append the items.</param>
 		/// <param name="tiRel">The <see cref="TextImageRelation"/> value applied to each <see cref="ToolStripButton"/> instance created.</param>
 		/// <remarks>
-		/// For best results, ensure the <c>Text</c> and/or <c>Image</c> property are set on every <see cref="Command"/> instance. A best practice would be to
-		/// call this one before the <see cref="Form"/> is loaded and after all <see cref="Command"/> instances have been added to the <see cref="Commands"/> property.
+		/// For best results, ensure the <c>Text</c> and/or <c>Image</c> property are set on every <see cref="Command"/> instance. A best
+		/// practice would be to call this one before the <see cref="Form"/> is loaded and after all <see cref="Command"/> instances have
+		/// been added to the <see cref="Commands"/> property.
 		/// </remarks>
 		public void LoadToolStripFromCommands([NotNull] ToolStripItemCollection tools, TextImageRelation tiRel = TextImageRelation.ImageBeforeText)
 		{
@@ -459,10 +475,7 @@ namespace VBoxMediumMgr
 		/// <summary>Specifies whether this object can provide its extender properties to the specified object.</summary>
 		/// <param name="extendee">The <see cref="T:System.Object"/> to receive the extender properties.</param>
 		/// <returns>true if this object can provide extender properties to the specified object; otherwise, false.</returns>
-		bool IExtenderProvider.CanExtend(object extendee)
-		{
-			return !(extendee is CommandBindings) && Binders.Any(b => b.SupportedType.IsInstanceOfType(extendee));
-		}
+		bool IExtenderProvider.CanExtend(object extendee) => !(extendee is CommandBindings) && Binders.Any(b => b.SupportedType.IsInstanceOfType(extendee));
 
 		[CanBeNull]
 		private static ICommandBinder GetBinder([NotNull] Component c) => Binders.FirstOrDefault(b => b.SupportedType.IsInstanceOfType(c));
@@ -490,7 +503,7 @@ namespace VBoxMediumMgr
 
 		private void OnCommandClick(object sender, EventArgs e)
 		{
-			if (sender is Component c && bindings.TryGetValue(c, out Command cmd))
+			if (sender is Component c && bindings.TryGetValue(c, out var cmd))
 				cmd?.OnClick(sender);
 		}
 
@@ -547,28 +560,6 @@ namespace VBoxMediumMgr
 		}
 	}
 
-	/// <summary>A binder for all controls derived from <see cref="ButtonBase"/>.</summary>
-	/// <seealso cref="ControlBinder"/>
-	public class ButtonCommandBinder : ControlBinder
-	{
-		/// <summary>Gets the type of the supported.</summary>
-		/// <value>The type of the supported.</value>
-		public override Type SupportedType { get; } = typeof(ButtonBase);
-
-		/// <summary>Sets the value of a named property of type <typeparamref name="T"/>.</summary>
-		/// <typeparam name="T">The type of the property.</typeparam>
-		/// <param name="component">The <see cref="Component"/> on which to see the property.</param>
-		/// <param name="propertyName">
-		/// The name of the property. If the implemented class cannot support a property of this name, it should return without throwing an exception.
-		/// </param>
-		/// <param name="value">The value to assign to the named property.</param>
-		public override void SetValue<T>(Component component, string propertyName, T value)
-		{
-			if (propertyName == "ToolTipText") return;
-			base.SetValue(component, propertyName, value);
-		}
-	}
-
 	/// <summary>A binder for all components derived from <see cref="ToolStripItem"/>.</summary>
 	/// <seealso cref="ICommandBinder"/>
 	public class ToolStripItemCommandBinder : ICommandBinder
@@ -616,13 +607,12 @@ namespace VBoxMediumMgr
 
 		internal class BinderActions : AttributedDesignerActionList
 		{
-			public BinderActions(CommandBindingsDesigner designer, CommandBindings component) : base(designer, component) { }
+			public BinderActions(CommandBindingsDesigner designer, CommandBindings component) : base(designer, component)
+			{
+			}
 
 			[DesignerActionMethod("Edit commands...")]
-			public void InvokeCommandsDialog()
-			{
-				ParentDesigner.EditValue("Commands", ParentDesigner.Component);
-			}
+			public void InvokeCommandsDialog() => ParentDesigner.EditValue("Commands", ParentDesigner.Component);
 		}
 	}
 }
